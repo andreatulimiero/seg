@@ -1,0 +1,10 @@
+address: A,127.0.0.1:23000
+remotes:
+    - address: B,127.0.0.1:23000
+      rendezvousAddr: R
+pathing:
+  keepAliveTimeout: 150s
+  keepAliveInterval: 30s
+  keepAliveTimeoutInterval: 10s
+  migrateGraceTimeout: 300ms
+adapterConfPath: adapter.yaml

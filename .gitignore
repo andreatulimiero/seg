@@ -1,0 +1,11 @@
+bin/*
+!bin/.gitkeep
+
+# IDE
+.idea/
+
+# TODO: Developing only
+laneca/
+TESTING.md
+Dockerfile
+Makefile
