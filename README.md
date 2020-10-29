@@ -52,5 +52,5 @@ Second, compile the binaries with `go build`.
 If you intend to run the compiled binary on a different machine, it's easier to compile the binary statically, to avoid incompatibility issues.
 For a statical compilation use the following flags `-ldflags="-extldflags=-static" -tags sqlite_omit_load_extension`.
 
-Finally, give the binary `CAP_NET_ADMIN` capabilities and run it in a folder with the respective `conf.yaml` and `adapteer.yaml`
+Finally, give the binary `CAP_NET_ADMIN` capabilities and run it in a folder with the respective `conf.yaml` and `adapter.yaml`
 configuration files (a different path can also be specified).
