@@ -1,5 +1,6 @@
 SEG (SCION Extensible Gateway)
 ---
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/andreatulimiero/seg)](https://pkg.go.dev/github.com/andreatulimiero/seg)
 
 The SEG (SCION Extensible Gateway) offers a framework to take advantage of the SCION architecture using existing
 protocols and applications.
