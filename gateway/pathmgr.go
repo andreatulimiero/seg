@@ -36,11 +36,12 @@ import (
 )
 
 const (
-	defaultKeepAliveTimeout 		= 300 * time.Millisecond
-	defaultKeepAliveInterval 		= 50 * time.Millisecond
-	defaultKeepAliveTimeoutInterval	= 30 * time.Millisecond
-	defaultMigrateGraceTimeout 		= 500 * time.Millisecond
+	defaultKeepAliveTimeout         = 300 * time.Millisecond
+	defaultKeepAliveInterval        = 50 * time.Millisecond
+	defaultKeepAliveTimeoutInterval = 30 * time.Millisecond
+	defaultMigrateGraceTimeout      = 500 * time.Millisecond
 )
+
 var (
 	defaultPathingConf = pathingConf{
 		KeepAliveTimeout:         defaultKeepAliveTimeout,
@@ -53,7 +54,8 @@ var (
 type PathSorter interface {
 	SortPaths([]snet.Path) []snet.Path
 }
-type leastHopsPathSorter struct {}
+type leastHopsPathSorter struct{}
+
 func (s leastHopsPathSorter) SortPaths(paths []snet.Path) []snet.Path {
 	sort.Slice(paths, func(i, j int) bool {
 		a, b := paths[i].(sciond.Path), paths[j].(sciond.Path)
@@ -68,7 +70,7 @@ type pathingConf struct {
 	// KeepAliveTimeoutInterval is the interval between checking timeouts
 	KeepAliveTimeoutInterval time.Duration `yaml:"keepAliveTimeoutInterval"`
 	// KeepAliveTimeout is the timeout after which a path is to be considered inactive
-	KeepAliveTimeout    time.Duration `yaml:"keepAliveTimeout"`
+	KeepAliveTimeout time.Duration `yaml:"keepAliveTimeout"`
 	// MigrateGraceTimeout is the first KeepAliveTimeout after a path migration
 	MigrateGraceTimeout time.Duration `yaml:"migrateGraceTimeout"`
 }
@@ -79,10 +81,10 @@ type pathMgr struct {
 	pathSorter       PathSorter
 	pathsUpdateMutex sync.Mutex
 
-	currPath	snet.Path
-	paths       []snet.Path
-	pathIdx     int
-	hiddenPaths []snet.Path
+	currPath       snet.Path
+	paths          []snet.Path
+	pathIdx        int
+	hiddenPaths    []snet.Path
 	hiddenPathsIdx int
 
 	// Probing
@@ -128,7 +130,9 @@ func (m *pathMgr) updatePathsToRemote() error {
 		remoteIA = m.peer.gateway.localAddr().IA
 	)
 	paths, err := sdConn.Paths(context.Background(), localIA, remoteIA, sciond.PathReqFlags{Refresh: true})
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 
 	// get unique paths by fingerprint
 	pathsSet := make(map[snet.PathFingerprint]snet.Path)
@@ -142,7 +146,7 @@ func (m *pathMgr) updatePathsToRemote() error {
 	}
 	var uniquePaths []snet.Path
 	for _, path := range pathsSet {
-		uniquePaths= append(uniquePaths, path)
+		uniquePaths = append(uniquePaths, path)
 	}
 
 	uniquePaths = m.pathSorter.SortPaths(uniquePaths)
@@ -160,7 +164,7 @@ func (m *pathMgr) nextPath(hidden bool) snet.Path {
 	m.pathsUpdateMutex.Lock()
 	defer m.pathsUpdateMutex.Unlock()
 	if hidden && len(m.hiddenPaths) > 0 {
-		if m.currPath == m.hiddenPaths[m.hiddenPathsIdx] && m.hiddenPathsIdx == len(m.hiddenPaths) - 1 {
+		if m.currPath == m.hiddenPaths[m.hiddenPathsIdx] && m.hiddenPathsIdx == len(m.hiddenPaths)-1 {
 			// We tried all hidden paths, switch to trying public paths
 			m.hiddenPathsIdx = 0
 			return m.paths[m.pathIdx]
@@ -198,26 +202,26 @@ func (m *pathMgr) migrate() error {
 	return nil
 }
 
-type RevocationHandler struct {}
+type RevocationHandler struct{}
 
 // XXX: Not in use since revocation cannot be trusted to be reliable and to happen promptly
 func (r *RevocationHandler) RevokeRaw(ctx context.Context, rawSRevInfo common.RawBytes) {
 	/*
-	sRevInfo, err := path_mgmt.NewSignedRevInfoFromRaw(rawSRevInfo)
-	if err != nil {
-		log.Error("Revocation failed, unable to parse signed revocation info",
-			"raw", rawSRevInfo, "err", err)
-		return
-	}
-	revInfo, err := sRevInfo.RevInfo()
-	if err != nil {
-		log.Error("Error getting revocation info", "err", err)
-	}
-	log.Info("Received revocation", "info", revInfo)
-	for _, client := range asClientMap {
-		log.Info("Migrating client via revocation", "remote", client.Remote)
-		go migrateClientPath(client, false)
-	}
+		sRevInfo, err := path_mgmt.NewSignedRevInfoFromRaw(rawSRevInfo)
+		if err != nil {
+			log.Error("Revocation failed, unable to parse signed revocation info",
+				"raw", rawSRevInfo, "err", err)
+			return
+		}
+		revInfo, err := sRevInfo.RevInfo()
+		if err != nil {
+			log.Error("Error getting revocation info", "err", err)
+		}
+		log.Info("Received revocation", "info", revInfo)
+		for _, client := range asClientMap {
+			log.Info("Migrating client via revocation", "remote", client.Remote)
+			go migrateClientPath(client, false)
+		}
 	*/
 }
 
@@ -297,4 +301,3 @@ func (m *pathMgr) connFailHandler(conn *snet.Conn) {
 	//	}
 	//}
 }
-

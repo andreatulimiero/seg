@@ -6,6 +6,8 @@ require (
 	github.com/JordiSubira/drkeymockup v0.0.0-20200508131302-092914ed1adb
 	github.com/aead/cmac v0.0.0-20160719120800-7af84192f0b1
 	github.com/golang/mock v1.4.0 // indirect
+	github.com/mdlayher/ethernet v0.0.0-20190606142754-0394541c37b7
+	github.com/mdlayher/raw v0.0.0-20191009151244-50f2db8cc065
 	github.com/monnand/dhkx v0.0.0-20180522003156-9e5b033f1ac4
 	github.com/scionproto/scion v0.5.0
 	github.com/songgao/water v0.0.0-20190725173103-fd331bda3f4b

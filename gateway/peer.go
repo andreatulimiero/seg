@@ -36,9 +36,9 @@ import (
 )
 
 type connConf struct {
-	Address     	YUDPAddr
-	Description 	string
-	RendezvousAddr 	*YIA `yaml:"rendezvousAddr"`
+	Address        YUDPAddr
+	Description    string
+	RendezvousAddr *YIA `yaml:"rendezvousAddr"`
 }
 
 // peer keeps track of the connection with another Gateway
@@ -55,10 +55,10 @@ type peer struct {
 	ingressCtrlConn, ingressDataConn *eConn
 	// Handshaking
 	handshakeRequestHandlerMutex sync.Mutex
-	handshakeCompletionMutex	sync.Mutex
-	cryptoHandshakeComplete		bool
-	checkHandshakeComplete		bool
-	handshakeCompleted 			bool
+	handshakeCompletionMutex     sync.Mutex
+	cryptoHandshakeComplete      bool
+	checkHandshakeComplete       bool
+	handshakeCompleted           bool
 }
 
 type PeerWriter interface {
@@ -76,20 +76,24 @@ func (peer *peer) DataWriter() io.Writer {
 
 func newPeer(gateway *Gateway, remoteConf connConf, pathingConf *pathingConf) (*peer, error) {
 	peer := &peer{
-		gateway: gateway,
-		remote:  remoteConf,
+		gateway:                 gateway,
+		remote:                  remoteConf,
 		cryptoHandshakeComplete: false,
-		checkHandshakeComplete: false,
-		handshakeCompleted: false,
+		checkHandshakeComplete:  false,
+		handshakeCompleted:      false,
 	}
 	peer.pathMgr = newPathMgr(pathingConf, peer)
 	peer.keyMgr = newKeyMgr(peer)
 	peer.drkeyMgr = newDRKeyMgr(peer)
 
 	err := peer.startIngressCtrlHandler()
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	err = peer.startIngressDataHandler()
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 
 	return peer, err
 }
@@ -99,7 +103,9 @@ func (peer *peer) startIngressCtrlHandler() error {
 	network := peer.gateway.network
 	listenAddr := &net.UDPAddr{IP: peer.gateway.localAddr().Host.IP}
 	conn, err := network.Listen(context.Background(), "udp", listenAddr, addr.SvcNone)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	econn := newEConn(conn, peer)
 	log.Debug("Listening for ctrl messages", "addr", econn.conn.LocalAddr())
 	go func() {
@@ -140,7 +146,9 @@ func (peer *peer) startIngressDataHandler() error {
 	network := peer.gateway.network
 	listenAddr := &net.UDPAddr{IP: peer.gateway.localAddr().Host.IP}
 	conn, err := network.Listen(context.Background(), "udp", listenAddr, addr.SvcNone)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	econn := newEConn(conn, peer)
 	log.Debug("Listening for incoming data", "addr", econn.conn.LocalAddr())
 	go func() {
@@ -173,7 +181,8 @@ func (peer *peer) startIngressDataHandler() error {
 // initHandshaking initiates a handshake process with a remote peer until it succeeds
 func (peer *peer) initHandshaking() {
 	log.Debug("Initiating handshake with", "addr", peer.remoteAddr())
-	hostKey, err := peer.drkeyMgr.clientHostKey(); if err != nil {
+	hostKey, err := peer.drkeyMgr.clientHostKey()
+	if err != nil {
 		log.Error("Error retrieving DRKey", "err", err)
 		return
 	}
@@ -206,7 +215,8 @@ func (peer *peer) handleHandshakeRequest(reqMsg *handshakeRequestMsg) {
 		return
 	}
 
-	hostKey, err := peer.drkeyMgr.serverHostKey(); if err != nil {
+	hostKey, err := peer.drkeyMgr.serverHostKey()
+	if err != nil {
 		log.Error("Error retrieving server host key", "err", err)
 		return
 	}
@@ -220,11 +230,13 @@ func (peer *peer) handleHandshakeRequest(reqMsg *handshakeRequestMsg) {
 	// Setup egress connections
 	peer.remoteCtrlPort, peer.remoteDataPort = reqMsg.CtrlPort, reqMsg.DataPort
 	// manually update paths to setup initial connection
-	err = peer.pathMgr.updatePathsToRemote(); if err != nil {
+	err = peer.pathMgr.updatePathsToRemote()
+	if err != nil {
 		log.Error("Error updating paths to remote", "err", err)
 		return
 	}
-	err = peer.setupEgressConnections(); if err != nil {
+	err = peer.setupEgressConnections()
+	if err != nil {
 		log.Error("Error setting up egress connections")
 		return
 	}
@@ -272,12 +284,14 @@ func (peer *peer) completeHandshake() {
 	peer.handshakeCompleted = true
 }
 
-func (peer *peer) getNewEConn(remoteIA addr.IA, remoteHost *net.UDPAddr, path snet.Path) (*eConn, error){
+func (peer *peer) getNewEConn(remoteIA addr.IA, remoteHost *net.UDPAddr, path snet.Path) (*eConn, error) {
 	remoteAddr := &snet.UDPAddr{IA: remoteIA, Host: remoteHost}
 	remoteAddr.Path = path.Path()
 	remoteAddr.NextHop = path.OverlayNextHop()
 	conn, err := peer.gateway.network.Dial(context.Background(), "udp", peer.gateway.localAddr().Host, remoteAddr, addr.SvcNone)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	return newEConn(conn, peer), nil
 }
 
@@ -289,12 +303,16 @@ func (peer *peer) setupEgressConnections() error {
 
 	remoteCtrlHost := &net.UDPAddr{IP: remoteAddr.Host.IP, Port: remoteCtrlPort}
 	peer.egressCtrlEConn, err = peer.getNewEConn(remoteAddr.IA, remoteCtrlHost, path)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	log.Info("Ctrl", "path", ifacesToString(path.Interfaces()))
 
 	remoteDataHost := &net.UDPAddr{IP: remoteAddr.Host.IP, Port: remoteDataPort}
 	peer.egressDataEConn, err = peer.getNewEConn(remoteAddr.IA, remoteDataHost, path)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	log.Info("Data", "path", ifacesToString(path.Interfaces()))
 
 	//go connFailHandler(client, peer.DataConn.conn)

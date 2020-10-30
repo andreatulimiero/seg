@@ -36,7 +36,9 @@ import (
 )
 
 func assert(cond bool, msg string) {
-	if cond { return }
+	if cond {
+		return
+	}
 	panic(msg)
 }
 

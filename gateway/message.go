@@ -46,11 +46,11 @@ type keepAliveMsg struct{}
 type handshakeRequestMsg struct {
 	PubKey    []byte
 	PubKeyTag []byte
-	CtrlPort 	int
-	DataPort 	int
+	CtrlPort  int
+	DataPort  int
 }
 
-type handshakeResponseMsg struct {}
+type handshakeResponseMsg struct{}
 
 type hiddenPathRequestMsg struct {
 	PathSegment seg.PathSegment
@@ -63,7 +63,7 @@ func writeMsg(msg Message, writer io.Writer) error {
 		return err
 	}
 	n, err := writer.Write(buf.Bytes())
-	if err != nil{
+	if err != nil {
 		return err
 	} else if n < len(buf.Bytes()) {
 		log.Error("Buffer too long", "required", len(buf.Bytes()), "sent", n)
@@ -88,4 +88,3 @@ func ReadMsg(reader readerFromAddr) (Message, *snet.UDPAddr, error) {
 	}
 	return msg, raddr.(*snet.UDPAddr), nil
 }
-

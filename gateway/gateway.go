@@ -20,7 +20,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 package gateway
 
 import (
@@ -53,7 +52,9 @@ func newGateway(conf conf, pathDBPath string) (*Gateway, error) {
 	}
 	var err error
 	gateway.sdConn, gateway.network, err = getSCIONNetwork(*dispatcher, *sciondAddr, gateway.conf.Address.IA)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	return gateway, nil
 }
 
@@ -134,11 +135,15 @@ func (gateway *Gateway) getConnTo(remoteAddr *snet.UDPAddr) (*snet.Conn, error) 
 	sdConn, network := gateway.sdConn, gateway.network
 	localAddr := gateway.localAddr()
 	paths, err := sdConn.Paths(context.Background(), remoteAddr.IA, localAddr.IA, sciond.PathReqFlags{Refresh: true})
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	remoteAddr.Path = paths[0].Path()
 	remoteAddr.NextHop = paths[0].OverlayNextHop()
 	newConn, err := network.Dial(context.Background(), "udp", localAddr.Host, remoteAddr, addr.SvcNone)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	return newConn, nil
 }
 
@@ -206,6 +211,8 @@ func (gateway *Gateway) getPeerWriter(IA string) (PeerWriter, error) {
 // WriteMsgOneOff writes a messages like WriteMsg but uses an ephemeral connection
 func (gateway *Gateway) WriteMsgOneOff(msg Message, remoteAddr *snet.UDPAddr) error {
 	c, err := gateway.getConnTo(remoteAddr)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	return WriteMsg(msg, c)
 }

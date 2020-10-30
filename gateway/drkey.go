@@ -33,7 +33,7 @@ import (
 )
 
 type drkeyMgr struct {
-	peer *peer
+	peer                   *peer
 	metaClient, metaServer drkey.Lvl2Meta
 }
 
@@ -65,7 +65,8 @@ func (m *drkeyMgr) clientHostKey() ([]byte, error) {
 
 	now := uint32(time.Now().Unix())
 	// get L2 key: (slow path)
-	key, err := mockupsciond.DRKeyGetLvl2Key(ctx, m.metaClient, now); if err != nil {
+	key, err := mockupsciond.DRKeyGetLvl2Key(ctx, m.metaClient, now)
+	if err != nil {
 		return nil, err
 	}
 	return key.Key, nil
@@ -82,7 +83,8 @@ func (m *drkeyMgr) dsForServer() (*drkey.DelegationSecret, error) {
 		DstIA:    m.metaServer.DstIA,
 	}
 	now := uint32(time.Now().Unix())
-	lvl2Key, err := mockupsciond.DRKeyGetLvl2Key(ctx, dsMeta, now); if err != nil {
+	lvl2Key, err := mockupsciond.DRKeyGetLvl2Key(ctx, dsMeta, now)
+	if err != nil {
 		return nil, err
 	}
 	return &drkey.DelegationSecret{
@@ -96,17 +98,20 @@ func (m *drkeyMgr) dsForServer() (*drkey.DelegationSecret, error) {
 
 func (m *drkeyMgr) hostKeyFromDS(ds *drkey.DelegationSecret) (*drkey.Lvl2Key, error) {
 	piskes := (protocol.KnownDerivations["piskes"]).(protocol.DelegatedDerivation)
-	derived, err := piskes.DeriveLvl2FromDS(m.metaServer, *ds); if err != nil {
+	derived, err := piskes.DeriveLvl2FromDS(m.metaServer, *ds)
+	if err != nil {
 		return nil, err
 	}
 	return &derived, nil
 }
 
 func (m *drkeyMgr) serverHostKey() ([]byte, error) {
-	ds, err := m.dsForServer(); if err != nil {
+	ds, err := m.dsForServer()
+	if err != nil {
 		return nil, err
 	}
-	drkey, err := m.hostKeyFromDS(ds); if err != nil {
+	drkey, err := m.hostKeyFromDS(ds)
+	if err != nil {
 		return nil, err
 	}
 	return drkey.Key, nil

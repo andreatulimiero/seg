@@ -39,11 +39,11 @@ import (
 var _ gateway.Adapter = (*IPAdapter)(nil)
 
 const (
-	defaultMTU 	  	= 1200
-	defaultTxQlen 	= 1000
-	defaultTunName	= "tun0"
-	ip4Ver    = 0x4
-	ip4DstOff = 16
+	defaultMTU     = 1200
+	defaultTxQlen  = 1000
+	defaultTunName = "tun0"
+	ip4Ver         = 0x4
+	ip4DstOff      = 16
 )
 
 func init() {
@@ -53,7 +53,7 @@ func init() {
 type ConfMsg struct {
 	//MACs         []laneca.Device
 	//FlowPolicies []laneca.FlowPolicyConf
-	Net          net.IPNet
+	Net net.IPNet
 }
 
 type Conf struct {
@@ -66,7 +66,7 @@ type Conf struct {
 
 type netToClient struct {
 	net *net.IPNet
-	IA string
+	IA  string
 }
 
 type IPAdapter struct {
@@ -81,7 +81,9 @@ func newIPAdapter(conf Conf) (*IPAdapter, error) {
 	a.router = newRouter(a)
 	var err error
 	a.tunLink, a.tunIO, err = getTun(conf.MTU, conf.TxQlen, *conf.Addr.IP, conf.TunName)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	return a, nil
 }
 
@@ -115,7 +117,7 @@ func getTun(MTU int, TxQlen int, ipAddr net.IP, tunName string) (netlink.Link, *
 	}
 	err = netlink.AddrAdd(link, &netlink.Addr{
 		IPNet: &net.IPNet{
-			IP: ipAddr,
+			IP:   ipAddr,
 			Mask: net.IPv4Mask(0xFF, 0xFF, 0xFF, 0xFF)}})
 	if err != nil {
 		return nil, nil, err
@@ -153,7 +155,7 @@ func (adapter *IPAdapter) HandshakeComplete(peer gateway.PeerWriter) {
 	msg := ConfMsg{
 		//MACs:         Cfg.LaNeCa.MACs,
 		//FlowPolicies: Cfg.LaNeCa.Policies.Flow,
-		Net:          *adapter.conf.Subnet.IPNet}
+		Net: *adapter.conf.Subnet.IPNet}
 	log.Debug("Sending conf to remote gateway")
 	err := gateway.WriteMsg(msg, peer.CtrlWriter())
 	if err != nil {
@@ -165,11 +167,11 @@ func (adapter *IPAdapter) ProcessCtrlMsg(msg gateway.Message, remoteIA addr.IA) 
 	switch reqMsg := msg.(type) {
 	case *ConfMsg:
 		log.Debug("Received IP conf", "msg", reqMsg)
-			//for _, mac := range conf.MACs {
-			//	log.Debug("Updating mac forwarding", "mac", mac, "remote", peer.remote.Address.IA)
-			//	lanecaAdapter.MACsToGatewayClientMap[mac.String()] = peer
-			//}
-			//LoadFlowPolicies(conf.FlowPolicies)
+		//for _, mac := range conf.MACs {
+		//	log.Debug("Updating mac forwarding", "mac", mac, "remote", peer.remote.Address.IA)
+		//	lanecaAdapter.MACsToGatewayClientMap[mac.String()] = peer
+		//}
+		//LoadFlowPolicies(conf.FlowPolicies)
 		err := adapter.router.addNet(&reqMsg.Net, remoteIA.String())
 		if err != nil {
 			log.Error("Error adding routing", "net", reqMsg.Net, "remoteIA", remoteIA, "err", err)
@@ -218,7 +220,7 @@ func (adapter *IPAdapter) ProcessEgressPkt(buf []byte, getPeerWriter func(string
 	}
 }
 
-func (adapter *IPAdapter) Read(buf []byte) (int, error){
+func (adapter *IPAdapter) Read(buf []byte) (int, error) {
 	return adapter.tunIO.Read(buf)
 }
 

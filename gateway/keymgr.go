@@ -32,13 +32,13 @@ import (
 )
 
 type keyMgr struct {
-	peer   *peer
-	group  *dhkx.DHGroup
-	priKey *dhkx.DHKey
-	pubKey []byte
-	key    []byte
-	iv     []byte
-	block  cipher.Block
+	peer             *peer
+	group            *dhkx.DHGroup
+	priKey           *dhkx.DHKey
+	pubKey           []byte
+	key              []byte
+	iv               []byte
+	block            cipher.Block
 	pubKeyCheckMutex sync.Mutex
 }
 
@@ -48,9 +48,12 @@ func newKeyMgr(peer *peer) *keyMgr {
 
 // initDataCrypto initializes data plane crypto structures
 func (k *keyMgr) initDataCrypto(remotePubKey []byte) error {
-	if len(k.key) != 0 { panic("Key was already initialized") }
+	if len(k.key) != 0 {
+		panic("Key was already initialized")
+	}
 
-	err := k.computeSharedKey(remotePubKey); if err != nil {
+	err := k.computeSharedKey(remotePubKey)
+	if err != nil {
 		return err
 	}
 	k.block, err = aes.NewCipher(k.key[:32])
@@ -65,9 +68,13 @@ func (k *keyMgr) initDataCrypto(remotePubKey []byte) error {
 func (k *keyMgr) computePriPubPair() error {
 	var err error
 	k.group, err = dhkx.GetGroup(0)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	k.priKey, err = k.group.GeneratePrivateKey(nil)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	k.pubKey = k.priKey.Bytes()
 	return nil
 }
@@ -77,17 +84,23 @@ func (k *keyMgr) getPubKey() ([]byte, error) {
 	k.pubKeyCheckMutex.Lock()
 	defer k.pubKeyCheckMutex.Unlock()
 	if len(k.pubKey) == 0 {
-		if err := k.computePriPubPair(); err != nil { return nil, err }
+		if err := k.computePriPubPair(); err != nil {
+			return nil, err
+		}
 	}
 	return k.pubKey, nil
 }
 
 // getAuthdPubKey returns an authenticated pubKey using getCMAC keyed with authKey
-func (k *keyMgr) getAuthdPubKey(authKey []byte) ([]byte, []byte, error){
+func (k *keyMgr) getAuthdPubKey(authKey []byte) ([]byte, []byte, error) {
 	pubKey, err := k.getPubKey()
-	if err != nil { return nil, nil, err }
+	if err != nil {
+		return nil, nil, err
+	}
 	pubTag, err := getCMAC(pubKey, authKey)
-	if err != nil { return nil, nil, err }
+	if err != nil {
+		return nil, nil, err
+	}
 	return pubKey, pubTag, nil
 }
 
@@ -95,15 +108,18 @@ func (k *keyMgr) getAuthdPubKey(authKey []byte) ([]byte, []byte, error){
 func (k *keyMgr) verifyRemotePubKey(tag []byte, key []byte, authKey []byte) (bool, error) {
 	// Check remote key authenticity
 	c, err := aes.NewCipher(authKey)
-	if err != nil { return false, err }
+	if err != nil {
+		return false, err
+	}
 	return cmac.Verify(tag, key, c, len(authKey)), nil
 }
 
 // computeSharedKey completes the DH key exchange and stores the results in the keyMgr
 func (k *keyMgr) computeSharedKey(remotePubKey []byte) error {
 	key, err := k.group.ComputeKey(dhkx.NewPublicKey(remotePubKey), k.priKey)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	k.key = key.Bytes()
 	return nil
 }
-

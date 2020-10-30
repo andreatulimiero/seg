@@ -122,4 +122,3 @@ func (p *partialHiddenPath) Copy() snet.Path {
 		dst:     p.dst,
 	}
 }
-

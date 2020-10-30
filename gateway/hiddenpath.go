@@ -61,14 +61,18 @@ func (p partialHiddenPath) String() string {
 func (m *pathMgr) handleHiddenPathRequest(reqMsg *hiddenPathRequestMsg) error {
 	log.Debug("Received hidden path")
 	paths, err := m.buildHiddenPaths(&reqMsg.PathSegment)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	m.storeHiddenPaths(paths)
 	return nil
 }
 
 func (m *pathMgr) buildHiddenPaths(remotePathSegment *seg.PathSegment) ([]snet.Path, error) {
 	localPathSegment, err := m.getPathSegmentToRendezvous()
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	paths, err := m.combineHiddenSegments(localPathSegment, remotePathSegment)
 	if err != nil {
 		return nil, fmt.Errorf("error combining hidden segments: %s", err)
@@ -76,9 +80,9 @@ func (m *pathMgr) buildHiddenPaths(remotePathSegment *seg.PathSegment) ([]snet.P
 	return paths, nil
 }
 
-func (m *pathMgr) combineHiddenSegments(localPathSegment, remotePathSegment *seg.PathSegment) ([]snet.Path, error){
+func (m *pathMgr) combineHiddenSegments(localPathSegment, remotePathSegment *seg.PathSegment) ([]snet.Path, error) {
 	var (
-		ups, downs = []*seg.PathSegment{localPathSegment}, []*seg.PathSegment{remotePathSegment}
+		ups, downs        = []*seg.PathSegment{localPathSegment}, []*seg.PathSegment{remotePathSegment}
 		localIA, remoteIA = m.peer.gateway.localAddr().IA, m.peer.remoteAddr().IA
 	)
 	log.Debug("Combining paths", "local", localPathSegment, "remote", remotePathSegment)
@@ -95,7 +99,8 @@ func (m *pathMgr) combineHiddenSegments(localPathSegment, remotePathSegment *seg
 			}
 		}
 		if foundRendezvous {
-			hPath, err := newPartialHiddenPath(p, m.getOverlayNextHop(), m.peer.remoteAddr().IA); if err != nil {
+			hPath, err := newPartialHiddenPath(p, m.getOverlayNextHop(), m.peer.remoteAddr().IA)
+			if err != nil {
 				log.Error("Error creating partial hidden path", "err", err)
 			}
 			hiddenPaths = append(hiddenPaths, hPath)
@@ -123,7 +128,9 @@ func (m *pathMgr) getPathSegmentToRendezvous() (*seg.PathSegment, error) {
 
 func (m *pathMgr) sendHiddenPath() error {
 	localPathSegment, err := m.getPathSegmentToRendezvous()
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	hiddenPathMsg := &hiddenPathRequestMsg{PathSegment: *localPathSegment}
 	log.Debug("Sending hidden paths ...")
 	err = m.peer.WriteMsg(hiddenPathMsg)
@@ -150,7 +157,9 @@ func getPathSegmentForAS(rendezvous, remote *addr.IA, dbPath string) (*seg.PathS
 			continue
 		}
 		foundRendezvous, foundRemote := false, false
-		if res.Result.Type != proto.PathSegType_up { continue }
+		if res.Result.Type != proto.PathSegType_up {
+			continue
+		}
 		var hops []addr.IA
 		for _, as := range res.Result.Seg.ASEntries {
 			hops = append(hops, as.IA())
@@ -162,7 +171,9 @@ func getPathSegmentForAS(rendezvous, remote *addr.IA, dbPath string) (*seg.PathS
 			}
 		}
 		log.Trace("Filter", "hops", hops, "foundRendezvous", foundRendezvous, "foundRemote", foundRemote)
-		if !foundRendezvous || foundRemote { continue }
+		if !foundRendezvous || foundRemote {
+			continue
+		}
 		// TODO: Make some sort of selection out of the possible segments
 		return res.Result.Seg, nil
 	}

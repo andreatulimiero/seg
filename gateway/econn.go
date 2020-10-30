@@ -43,8 +43,8 @@ type readerFromAddr interface {
 
 // eConn is an encrypted snet.Conn
 type eConn struct {
-	peer 		*peer
-	conn        *snet.Conn
+	peer *peer
+	conn *snet.Conn
 }
 
 func newEConn(conn *snet.Conn, peer *peer) *eConn {
@@ -55,7 +55,9 @@ func (e *eConn) writeTo(b []byte, raddr net.Addr) (int, error) {
 	if !e.peer.cryptoHandshakeComplete {
 		return -1, cryptoHandshakeError
 	}
-	if e.peer.pathMgr.isMigrating == 1 { return -1, PeerIsMigratingError }
+	if e.peer.pathMgr.isMigrating == 1 {
+		return -1, PeerIsMigratingError
+	}
 	block := e.peer.keyMgr.block
 	padLen := aes.BlockSize - (len(b) % aes.BlockSize)
 	padding := bytes.Repeat([]byte{byte(padLen)}, padLen)
@@ -74,10 +76,12 @@ func (e *eConn) ReadFrom(buf []byte) (int, net.Addr, error) {
 	if err != nil {
 		return -1, nil, err
 	}
-	if !e.peer.cryptoHandshakeComplete { return -1, nil, fmt.Errorf("cryptoHandshakeComplete not yet true")}
+	if !e.peer.cryptoHandshakeComplete {
+		return -1, nil, fmt.Errorf("cryptoHandshakeComplete not yet true")
+	}
 	block := e.peer.keyMgr.block
 	ciphertext := buf[:n]
-	if len(ciphertext) < aes.BlockSize || len(ciphertext) % aes.BlockSize != 0 {
+	if len(ciphertext) < aes.BlockSize || len(ciphertext)%aes.BlockSize != 0 {
 		return -1, nil, fmt.Errorf("invalid ciphertext length: %d", len(ciphertext))
 	}
 	mode := cipher.NewCBCDecrypter(block, e.peer.keyMgr.iv)

@@ -35,8 +35,8 @@ const (
 )
 
 var (
-	dispatcher   = flag.String("dispatcher", "", "Path to dispatcher socket")
-	sciondAddr   = flag.String("sciond", sciond.DefaultSCIONDAddress, "SCIOND address")
+	dispatcher     = flag.String("dispatcher", "", "Path to dispatcher socket")
+	sciondAddr     = flag.String("sciond", sciond.DefaultSCIONDAddress, "SCIOND address")
 	hiddenFailover = flag.Bool("hiddenFailover", false, "[TEST] force failover over hidden path")
 )
 

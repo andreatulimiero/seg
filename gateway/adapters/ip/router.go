@@ -30,7 +30,7 @@ import (
 )
 
 type Router struct {
-	adapter *IPAdapter
+	adapter         *IPAdapter
 	netToClientList []netToClient
 }
 
@@ -60,4 +60,3 @@ func (r *Router) addNet(dst *net.IPNet, IA string) error {
 	}
 	return nil
 }
-

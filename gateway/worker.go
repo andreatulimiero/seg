@@ -32,16 +32,16 @@ const (
 )
 
 type worker struct {
-	gateway *Gateway
+	gateway     *Gateway
 	pktsChannel chan []byte
-	pktsPool *memPool
-	adapter Adapter
+	pktsPool    *memPool
+	adapter     Adapter
 }
 
 func newWorker(adapter Adapter, gateway *Gateway) *worker {
 	w := &worker{
-		gateway: gateway,
-		adapter: adapter,
+		gateway:     gateway,
+		adapter:     adapter,
 		pktsChannel: make(chan []byte, chanLength),
 		//pktsPool:sync.Pool{
 		//	New: func() interface{} {

@@ -27,7 +27,7 @@ import (
 )
 
 type memPool struct {
-	pool [][]byte
+	pool  [][]byte
 	mutex sync.Mutex
 }
 
@@ -46,8 +46,8 @@ func (m *memPool) get() []byte {
 	if poolSize == 0 {
 		return nil
 	}
-	buf := m.pool[poolSize - 1]
-	m.pool = m.pool[:poolSize - 1]
+	buf := m.pool[poolSize-1]
+	m.pool = m.pool[:poolSize-1]
 	return buf
 }
 
