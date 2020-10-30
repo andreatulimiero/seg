@@ -27,7 +27,7 @@ This setup can be used with any IP based applications, to name a few:
 ![Image of the IP Example](res/IPExample.png "IP Example")
 
 ## IPAdapter
-The code for this example can be found in `main.go`, and the adapter used (the IPAdapter) can be found [here](adapters/ip/).
+The code for this example can be found in `main.go`, and the adapter used (the IPAdapter) can be found [here](gateway/adapters/ip/).
 
 ## Configuration files
 For the sake of brevity we only show the configuration of gateway A (configuration of gateway B can be easily derived from it)

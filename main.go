@@ -25,8 +25,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	ipAdapter "github.com/andreatulimiero/seg/adapters/ip"
 	"github.com/andreatulimiero/seg/gateway"
+	ipAdapter "github.com/andreatulimiero/seg/gateway/adapters/ip"
 	"io/ioutil"
 	"os"
 	"os/signal"
