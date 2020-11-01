@@ -108,18 +108,14 @@ func (gateway *Gateway) listen() {
 			continue
 		}
 
-		if useWorkerMemPool {
-			freeBuf := gateway.egressWorker.pktsPool.get()
-			if freeBuf == nil {
-				log.Debug("Couldn't retrieve free buf")
-				continue
-			}
-			gateway.ProcessEgressPkt(buf[:n])
-			buf = freeBuf
-		} else {
-			gateway.ProcessEgressPkt(buf[:n])
-			buf = make([]byte, common.MaxMTU)
+		freeBuf := gateway.egressWorker.pktsPool.get()
+		if freeBuf == nil {
+			log.Debug("Couldn't retrieve free buf")
+			log.Error("Skipped egress")
+			continue
 		}
+		gateway.ProcessEgressPkt(buf[:n])
+		buf = freeBuf
 	}
 }
 

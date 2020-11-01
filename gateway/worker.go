@@ -43,11 +43,6 @@ func newWorker(adapter Adapter, gateway *Gateway) *worker {
 		gateway:     gateway,
 		adapter:     adapter,
 		pktsChannel: make(chan []byte, chanLength),
-		//pktsPool:sync.Pool{
-		//	New: func() interface{} {
-		//		return make([]byte, common.MaxMTU)
-		//	},
-		//},
 		pktsPool: newMemPool(common.MaxMTU, chanLength),
 	}
 	return w
@@ -62,12 +57,10 @@ func newIngressWorker(adapter Adapter, gateway *Gateway) *ingressWorker {
 }
 
 func (w *ingressWorker) Run() {
-	log.Debug("Starting ingress worker", "adapter", w.adapter)
+	log.Debug("Starting ingress worker ...", "adapter", w.adapter)
 	for buf := range w.pktsChannel {
 		w.adapter.ProcessIngressPkt(buf)
-		if useWorkerMemPool {
-			w.pktsPool.put(buf[:cap(buf)])
-		}
+		w.pktsPool.put(buf[:cap(buf)])
 	}
 }
 
@@ -83,8 +76,6 @@ func (w *egressWorker) Run() {
 	log.Debug("Starting egress worker", "adapter", w.adapter)
 	for buf := range w.pktsChannel {
 		w.adapter.ProcessEgressPkt(buf, w.gateway.getPeerWriter)
-		if useWorkerMemPool {
-			w.pktsPool.put(buf[:cap(buf)])
-		}
+		w.pktsPool.put(buf[:cap(buf)])
 	}
 }

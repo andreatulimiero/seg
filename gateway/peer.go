@@ -160,18 +160,14 @@ func (peer *peer) startIngressDataHandler() error {
 				continue
 			}
 
-			if useWorkerMemPool {
-				freeBuf := peer.gateway.ingressWorker.pktsPool.get()
-				if freeBuf == nil {
-					log.Debug("Couldn't retrieve free buf")
-					continue
-				}
-				peer.gateway.ProcessIngressPkt(buf[:n])
-				buf = freeBuf
-			} else {
-				peer.gateway.ProcessIngressPkt(buf[:n])
-				buf = make([]byte, common.MaxMTU)
+			freeBuf := peer.gateway.ingressWorker.pktsPool.get()
+			if freeBuf == nil {
+				log.Debug("Couldn't retrieve free buf")
+				log.Error("Skipped ingress pkt")
+				continue
 			}
+			peer.gateway.ProcessIngressPkt(buf[:n])
+			buf = freeBuf
 		}
 	}()
 	peer.ingressDataConn = econn

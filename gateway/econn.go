@@ -51,7 +51,7 @@ func newEConn(conn *snet.Conn, peer *peer) *eConn {
 	return &eConn{conn: conn, peer: peer}
 }
 
-func (e *eConn) writeTo(b []byte, raddr net.Addr) (int, error) {
+func (e *eConn) Write(b []byte) (int, error) {
 	if !e.peer.cryptoHandshakeComplete {
 		return -1, cryptoHandshakeError
 	}
@@ -64,11 +64,7 @@ func (e *eConn) writeTo(b []byte, raddr net.Addr) (int, error) {
 	plaintext := append(b, padding...)
 	mode := cipher.NewCBCEncrypter(block, e.peer.keyMgr.iv)
 	mode.CryptBlocks(plaintext, plaintext)
-	return e.conn.WriteTo(plaintext, raddr)
-}
-
-func (e *eConn) Write(b []byte) (int, error) {
-	return e.writeTo(b, e.conn.RemoteAddr())
+	return e.conn.Write(plaintext)
 }
 
 func (e *eConn) ReadFrom(buf []byte) (int, net.Addr, error) {

@@ -39,7 +39,7 @@ import (
 var _ gateway.Adapter = (*IPAdapter)(nil)
 
 const (
-	defaultMTU     = 1200
+	defaultMTU     = 1500
 	defaultTxQlen  = 1000
 	defaultTunName = "tun0"
 	ip4Ver         = 0x4

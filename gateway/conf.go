@@ -29,7 +29,6 @@ import (
 )
 
 const (
-	useWorkerMemPool       = true
 	handshakeRetryInterval = 1 * time.Second
 	pathRefreshInterval    = 15 * time.Second
 )
